@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from abc import ABC, abstractmethod
 from typing import List
 from domain.models.transaction import Transaction
@@ -24,15 +23,3 @@ class ITransactionRepository(ABC):
     @abstractmethod
     def eliminar_transaccion(self, id_transaccion: int) -> None:
         pass
-=======
-from uuid import UUID
-from typing import List
-from domain.entities.transaction import Transaction
-
-class ITransactionRepository:
-    def listar_por_cuenta(self, cuenta_id: UUID) -> List[Transaction]:
-        """
-        Lista las transacciones asociadas a una cuenta por su ID.
-        """
-        pass
->>>>>>> origin/bryan
