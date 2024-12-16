@@ -1,30 +1,3 @@
-<<<<<<< HEAD
-from abc import ABC, abstractmethod
-from typing import List
-from domain.models.transaction import Transaction
-
-class IServicioTransacciones(ABC):
-
-    @abstractmethod
-    def crear_transaccion(self, transaccion: Transaction) -> Transaction:
-        pass
-
-    @abstractmethod
-    def obtener_transaccion(self, id_transaccion: int) -> Transaction:
-        pass
-
-    @abstractmethod
-    def actualizar_transaccion(self, transaccion: Transaction) -> Transaction:
-        pass
-
-    @abstractmethod
-    def eliminar_transaccion(self, id_transaccion: int) -> None:
-        pass
-
-    @abstractmethod
-    def listar_transacciones(self) -> List[Transaction]:
-        pass
-=======
 # domain/services/transaction_service.py 
 from domain.repositories.i_transaction_repository import ITransactionRepository
 from domain.repositories.i_account_repository import IAccountRepository
@@ -68,4 +41,3 @@ class TransactionService:
         """
         return self._transaction_repository.obtener_por_cuenta(cuenta_id)
 
->>>>>>> origin/bryan
