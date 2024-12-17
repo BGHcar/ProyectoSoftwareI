@@ -1,9 +1,8 @@
 # domain/services/transaction_service.py 
-from domain.repositories.i_transaction_repository import ITransactionRepository
-from domain.repositories.i_account_repository import IAccountRepository
-from domain.entities.transaction import Transaction
-from domain.entities.account import Account
-
+from gestion_transacciones_hsa.domain.repositories.i_transaction_repository import ITransactionRepository
+from gestion_transacciones_hsa.domain.repositories.i_account_repository import IAccountRepository
+from gestion_transacciones_hsa.domain.entities.transaction import Transaction
+from gestion_transacciones_hsa.domain.entities.account import Account
 
 class TransactionService:
     def __init__(

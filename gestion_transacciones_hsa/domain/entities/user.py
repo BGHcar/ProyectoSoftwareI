@@ -2,8 +2,7 @@
 
 from uuid import UUID
 from typing import List, Optional
-from domain.entities.account import Account
-
+from gestion_transacciones_hsa.domain.entities.account import Account
 class User:
     def __init__(
         self,

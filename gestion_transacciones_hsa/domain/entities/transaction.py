@@ -1,7 +1,7 @@
 # domain/entities/transaction.py
 from uuid import UUID
 from datetime import datetime
-from domain.entities.transaction_type import TransactionType
+from gestion_transacciones_hsa.domain.entities.transaction_type import TransactionType
 from enum import Enum
 from decimal import Decimal
 
