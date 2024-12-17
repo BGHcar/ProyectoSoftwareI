@@ -4,9 +4,9 @@ from uuid import UUID, uuid4  # Importa UUID explícitamente
 from datetime import datetime
 from typing import List
 
-from gestion_transacciones_hsa.domain.entities.transaction import Transaction
-from gestion_transacciones_hsa.domain.entities.account import Account
-from gestion_transacciones_hsa.domain.repositories.i_transaction_service import ITransactionService
+from domain.entities.transaction import Transaction
+from domain.entities.account import Account
+from domain.repositories.i_transaction_service import ITransactionService
 
 class TransactionServiceMock(ITransactionService):
     def procesar_transacciones(self, transaction: Transaction, account: Account) -> None:

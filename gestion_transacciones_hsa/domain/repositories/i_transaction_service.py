@@ -1,7 +1,7 @@
 from uuid import UUID
 from typing import List
-from gestion_transacciones_hsa.domain.entities.transaction import Transaction
-from gestion_transacciones_hsa.domain.entities.account import Account
+from domain.entities.transaction import Transaction
+from domain.entities.account import Account
 from abc import ABC, abstractmethod  # Importar ABC para crear una clase abstracta
 
 

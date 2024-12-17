@@ -3,8 +3,8 @@ from unittest.mock import Mock
 from uuid import uuid4
 from typing import List
 
-from gestion_transacciones_hsa.domain.entities.account import Account
-from gestion_transacciones_hsa.domain.repositories.i_account_repository import IAccountRepository
+from domain.entities.account import Account
+from domain.repositories.i_account_repository import IAccountRepository
 
 class TestAccountRepository(unittest.TestCase):
     def setUp(self):
@@ -22,7 +22,7 @@ class TestAccountRepository(unittest.TestCase):
     def test_obtener_por_id(self):
         """Prueba obtener cuenta por ID"""
         # Configurar mock
-        self.repository.obtener_por_id.return_value = self.cuenta_prueba
+        self.repository.obtener_por_usuario.return_value = self.cuenta_prueba
         # Ejecutar
         cuenta = self.repository.obtener_por_id(self.cuenta_id)
         # Verificar

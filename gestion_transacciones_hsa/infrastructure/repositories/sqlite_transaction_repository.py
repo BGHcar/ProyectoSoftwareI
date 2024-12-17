@@ -58,28 +58,28 @@ class SQLiteTransactionRepository(ITransactionRepository):
                 )
             """)
 
-    def guardar(self, transaccion: Transaction) -> None:
+    def save(self, transaction: Transaction) -> None:
         """
         Guarda una transacción en la base de datos.
         
         Args:
-            transaccion: Objeto Transaction a guardar
+            transaction: Objeto Transaction a guardar
         """
-        with self._get_connection() as conn:  # Obtiene una conexión a la base de datos
+        with self._get_connection() as conn:
             conn.execute("""
                 INSERT OR REPLACE INTO transacciones 
                 (id, cuenta_id, monto, tipo, estado, fecha)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
-                str(transaccion.id),  # Convierte UUID a string
-                str(transaccion.cuenta_id),  # Convierte UUID a string
-                f"{transaccion.monto:.2f}",  # Formatea el monto a 2 decimales
-                transaccion.tipo.value,  # Obtiene el valor del enum
-                transaccion.estado.value,  # Obtiene el valor del enum
-                transaccion.fecha.isoformat()  # Convierte fecha a formato ISO
+                str(transaction.id),
+                str(transaction.cuenta_id),
+                f"{transaction.monto:.2f}",
+                transaction.tipo.value,
+                transaction.estado.value,
+                transaction.fecha.isoformat()
             ))
 
-    def obtener_por_id(self, id: UUID) -> Transaction:
+    def get_by_id(self, id: UUID) -> Transaction:
         """
         Obtiene una transacción por su ID.
         
@@ -92,48 +92,79 @@ class SQLiteTransactionRepository(ITransactionRepository):
         Raises:
             ValueError: Si no se encuentra la transacción
         """
-        with self._get_connection() as conn:  # Obtiene una conexión a la base de datos
+        with self._get_connection() as conn:
             cursor = conn.execute(
-                "SELECT * FROM transacciones WHERE id = ?", # Consulta por ID
-                (str(id),)  # Convierte UUID a string para la consulta
+                "SELECT * FROM transacciones WHERE id = ?",
+                (str(id),)
             )
-            row = cursor.fetchone()  # Obtiene la primera fila del resultado
+            row = cursor.fetchone()
             
-            if not row:  # Verifica si se encontró algún resultado
+            if not row:
                 raise ValueError(f"No se encontró la transacción con id {id}")
             
-            return Transaction(  # Crea y retorna un objeto Transaction
-                id=UUID(row[0]),  # Convierte string a UUID
-                cuenta_id=UUID(row[1]),  # Convierte string a UUID
-                monto=Decimal(str(row[2])),  # Convierte a Decimal
-                tipo=TransactionType(row[3]),  # Convierte string a enum
-                estado=TransactionState(row[4]),  # Convierte string a enum
-                fecha=datetime.fromisoformat(row[5])  # Convierte string a datetime
+            return Transaction(
+                id=UUID(row[0]),
+                cuenta_id=UUID(row[1]),
+                monto=Decimal(str(row[2])),
+                tipo=TransactionType(row[3]),
+                estado=TransactionState(row[4]),
+                fecha=datetime.fromisoformat(row[5])
             )
 
-    def listar_por_cuenta(self, cuenta_id: UUID) -> List[Transaction]:
+    def get_by_account(self, account_id: UUID) -> List[Transaction]:
         """
         Lista todas las transacciones de una cuenta específica.
         
         Args:
-            cuenta_id: UUID de la cuenta
+            account_id: UUID de la cuenta
             
         Returns:
             List[Transaction]: Lista de transacciones de la cuenta
         """
-        with self._get_connection() as conn:  # Obtiene una conexión a la base de datos
+        with self._get_connection() as conn:
             cursor = conn.execute(
-                "SELECT * FROM transacciones WHERE cuenta_id = ?",  # Consulta por cuenta_id
-                (str(cuenta_id),)  # Convierte UUID a string para la consulta
+                "SELECT * FROM transacciones WHERE cuenta_id = ?",
+                (str(account_id),)
             )
-            return [  # Retorna lista de transacciones
-                Transaction(  # Crea objeto Transaction para cada fila
-                    id=UUID(row[0]),  # Convierte string a UUID
-                    cuenta_id=UUID(row[1]),  # Convierte string a UUID
-                    monto=Decimal(str(row[2])),  # Convierte a Decimal
-                    tipo=TransactionType(row[3]),  # Convierte string a enum
-                    estado=TransactionState(row[4]),  # Convierte string a enum
-                    fecha=datetime.fromisoformat(row[5])  # Convierte string a datetime
+            return [
+                Transaction(
+                    id=UUID(row[0]),
+                    cuenta_id=UUID(row[1]),
+                    monto=Decimal(str(row[2])),
+                    tipo=TransactionType(row[3]),
+                    estado=TransactionState(row[4]),
+                    fecha=datetime.fromisoformat(row[5])
                 )
-                for row in cursor.fetchall()  # Itera sobre todas las filas
+                for row in cursor.fetchall()
             ]
+
+    def listar_todos(self) -> List[Transaction]:
+        """
+        Lista todas las transacciones.
+        
+        Returns:
+            List[Transaction]: Lista de todas las transacciones
+        """
+        with self._get_connection() as conn:
+            cursor = conn.execute("SELECT * FROM transacciones")
+            return [
+                Transaction(
+                    id=UUID(row[0]),
+                    cuenta_id=UUID(row[1]),
+                    monto=Decimal(str(row[2])),
+                    tipo=TransactionType(row[3]),
+                    estado=TransactionState(row[4]),
+                    fecha=datetime.fromisoformat(row[5])
+                )
+                for row in cursor.fetchall()
+            ]
+
+    # Los métodos en español ahora son alias de los métodos en inglés
+    def guardar(self, transaccion: Transaction) -> None:
+        return self.save(transaccion)
+
+    def obtener_por_id(self, id: UUID) -> Transaction:
+        return self.get_by_id(id)
+
+    def listar_por_cuenta(self, cuenta_id: UUID) -> List[Transaction]:
+        return self.get_by_account(cuenta_id)

@@ -1,5 +1,5 @@
 import unittest
-from gestion_transacciones_hsa.application.dtos.informe_dto import InformeDTO
+from application.dtos.informe_dto import InformeDTO
 
 class TestInformeDTO(unittest.TestCase):
     def test_inicializacion_atributos(self):

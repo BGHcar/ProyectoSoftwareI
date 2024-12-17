@@ -2,7 +2,7 @@ import unittest
 from uuid import UUID, uuid4
 from typing import List
 from unittest.mock import Mock
-from gestion_transacciones_hsa.domain.repositories.i_repository import IRepository
+from domain.repositories.i_repository import IRepository
 
 class EntidadPrueba:
     """Entidad de prueba para el repositorio genérico"""

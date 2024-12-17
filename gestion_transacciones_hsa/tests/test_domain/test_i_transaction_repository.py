@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import Mock
 from uuid import UUID, uuid4
 from typing import List
-from gestion_transacciones_hsa.domain.repositories.i_transaction_repository import ITransactionRepository
-from gestion_transacciones_hsa.domain.entities.transaction import Transaction
+from domain.repositories.i_transaction_repository import ITransactionRepository
+from domain.entities.transaction import Transaction
 
 
 class TransactionRepositoryMock(ITransactionRepository):

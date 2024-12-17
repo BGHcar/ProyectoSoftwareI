@@ -99,6 +99,47 @@ class MongoTransactionRepository(ITransactionRepository):  # Implementación Mon
             for t in transactions                   # Itera sobre los resultados
         ]
 
+    def listar_todos(self) -> List[Transaction]:
+        """
+        Lista todas las transacciones.
+        
+        Returns:
+            List[Transaction]: Lista de todas las transacciones
+        """
+        transactions = self.collection.find()
+        return [
+            Transaction(
+                id=UUID(t["_id"]),
+                cuenta_id=UUID(t["cuenta_id"]),
+                monto=Decimal(t["monto"]),
+                tipo=t["tipo"],
+                estado=t["estado"],
+                fecha=datetime.fromisoformat(t["fecha"])
+            )
+            for t in transactions
+        ]
+
+    def save(self, transaction: Transaction) -> None:
+        """
+        Implementación del método abstracto save.
+        Delega al método guardar.
+        """
+        self.guardar(transaction)
+
+    def get_by_id(self, id: UUID) -> Transaction:
+        """
+        Implementación del método abstracto get_by_id.
+        Delega al método obtener_por_id.
+        """
+        return self.obtener_por_id(id)
+
+    def get_by_account(self, account_id: UUID) -> List[Transaction]:
+        """
+        Implementación del método abstracto get_by_account.
+        Delega al método listar_por_cuenta.
+        """
+        return self.listar_por_cuenta(account_id)
+
     def __del__(self):                             # Destructor
         """Cierra la conexión al eliminar la instancia."""
         self.client.close()                        # Cierra la conexión a MongoDB

@@ -2,12 +2,25 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 from typing import List
 from abc import ABC, abstractmethod
-from gestion_transacciones_hsa.domain.entities.transaction import Transaction
+from domain.entities.transaction import Transaction
+from domain.repositories.i_repository import IRepository
 
-class ITransactionRepository(ABC):
+class ITransactionRepository(IRepository[Transaction]):
     """
-    Abstracción para las operaciones de persistencia relacionadas con las transacciones.
+    Interfaz específica para el repositorio de transacciones.
     """
+    
+    def get_by_account(self, account_id: UUID) -> List[Transaction]:
+        """
+        Lista todas las transacciones de una cuenta específica.
+        
+        Args:
+            account_id: UUID de la cuenta
+            
+        Returns:
+            List[Transaction]: Lista de transacciones de la cuenta
+        """
+        pass
 
     @abstractmethod
     def listar_por_cuenta(self, cuenta_id: UUID) -> List[Transaction]:

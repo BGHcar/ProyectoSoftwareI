@@ -2,7 +2,7 @@ import unittest
 from uuid import uuid4
 from datetime import datetime
 
-from gestion_transacciones_hsa.application.dtos.transaction_dto import TransactionDTO
+from application.dtos.transaction_dto import TransactionDTO
 
 class TestTransactionDTO(unittest.TestCase):
     # Definición de la clase de prueba que hereda de unittest.TestCase
