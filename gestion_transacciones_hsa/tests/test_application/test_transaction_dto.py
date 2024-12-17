@@ -1,7 +1,7 @@
 import unittest
 from uuid import uuid4
 from datetime import datetime
-
+from decimal import Decimal
 from application.dtos.transaction_dto import TransactionDTO
 
 class TestTransactionDTO(unittest.TestCase):
@@ -13,9 +13,9 @@ class TestTransactionDTO(unittest.TestCase):
         # Datos de prueba
         id = uuid4()  # Genera un UUID único para el id
         cuenta_id = uuid4()  # Genera un UUID único para cuenta_id
-        monto = 1500.0  # Asigna el valor 1500.0 al monto
-        tipo = "depósito"  # Asigna la cadena "depósito" al tipo
-        estado = "completado"  # Asigna la cadena "completado" al estado
+        monto = Decimal('1500.0')  # Asigna el valor 1500.0 al monto
+        tipo = "DEPOSITO"  # Asigna la cadena "DEPOSITO" al tipo
+        estado = "COMPLETADO"  # Asigna la cadena "COMPLETADO" al estado
         fecha = datetime(2024, 12, 15, 10, 30, 0)  # Asigna una fecha y hora específica a fecha
 
         # Crear instancia de TransaccionDTO
@@ -36,9 +36,9 @@ class TestTransactionDTO(unittest.TestCase):
         # Datos de prueba
         id = uuid4()  # Genera un UUID único para el id
         cuenta_id = uuid4()  # Genera un UUID único para cuenta_id
-        monto = 1500.0  # Asigna el valor 1500.0 al monto
-        tipo = "depósito"  # Asigna la cadena "depósito" al tipo
-        estado = "completado"  # Asigna la cadena "completado" al estado
+        monto = Decimal('1500.0')  # Asigna el valor 1500.0 al monto
+        tipo = "DEPOSITO"  # Asigna la cadena "DEPOSITO" al tipo
+        estado = "COMPLETADO"  # Asigna la cadena "COMPLETADO" al estado
         fecha = datetime(2024, 12, 15, 10, 30, 0)  # Asigna una fecha y hora específica a fecha
 
         # Crear instancia de TransaccionDTO
@@ -46,7 +46,7 @@ class TestTransactionDTO(unittest.TestCase):
         # Crea una instancia de TransactionDTO con los datos de prueba
 
         # Verificar la representación de la cadena
-        esperado = f"TransactionDTO(id={id}, cuenta_id={cuenta_id}, monto={monto}, tipo='depósito', estado='completado', fecha='{fecha}')"
+        esperado = f"TransactionDTO(id={id}, cuenta_id={cuenta_id}, monto={monto}, tipo='DEPOSITO', estado='COMPLETADO', fecha='{fecha}')"
         # Define la cadena esperada para la representación de la instancia
         self.assertEqual(repr(transaccion), esperado)
         # Verifica que la representación en cadena de la instancia es igual a la cadena esperada

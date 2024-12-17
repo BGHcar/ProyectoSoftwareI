@@ -3,6 +3,8 @@ from typing import List
 from domain.entities.transaction import Transaction
 from domain.entities.account import Account
 from abc import ABC, abstractmethod  # Importar ABC para crear una clase abstracta
+from application.dtos.transaction_dto import TransactionDTO
+from application.dtos.informe_dto import InformeDTO
 
 
 class ITransactionService(ABC):
@@ -12,7 +14,7 @@ class ITransactionService(ABC):
     """
 
     @abstractmethod
-    def procesar_transacciones(self, transaction: Transaction, account: Account) -> None:
+    def procesar_transaccion(self, transaction: Transaction, account: Account) -> None:
         """
         Procesa una transacción, realizando las validaciones y operaciones necesarias.
         Args:

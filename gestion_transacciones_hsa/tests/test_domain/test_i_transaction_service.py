@@ -9,7 +9,7 @@ from domain.entities.account import Account
 from domain.repositories.i_transaction_service import ITransactionService
 
 class TransactionServiceMock(ITransactionService):
-    def procesar_transacciones(self, transaction: Transaction, account: Account) -> None:
+    def procesar_transaccion(self, transaction: Transaction, account: Account) -> None:
         pass
 
     def listar_transacciones(self, cuenta_id: UUID) -> List[Transaction]:
@@ -37,13 +37,13 @@ class TestITransactionService(unittest.TestCase):
             fecha=datetime.now()
         )
 
-    def test_procesar_transacciones(self):
+    def test_procesar_transaccion(self):
         """Prueba el procesamiento de transacciones"""
         # Ejecutar
-        self.service.procesar_transacciones(self.transaccion, self.cuenta)
+        self.service.procesar_transaccion(self.transaccion, self.cuenta)
         
         # Verificar
-        self.service.procesar_transacciones.assert_called_once_with(
+        self.service.procesar_transaccion.assert_called_once_with(
             self.transaccion, 
             self.cuenta
         )

@@ -1,39 +1,38 @@
 import unittest
+from decimal import Decimal
 from application.dtos.informe_dto import InformeDTO
 
 class TestInformeDTO(unittest.TestCase):
     def test_inicializacion_atributos(self):
-        # Datos de prueba con valores típicos de un informe
-        total_depositos = 1000.0  # Monto total de depósitos realizados
-        total_retiros = 500.0     # Monto total de retiros efectuados
-        saldo_promedio = 750.0    # Promedio del saldo en la cuenta
-        transacciones = 10        # Número total de transacciones
+        # Datos de prueba
+        total_depositos = Decimal('1000.0')
+        total_retiros = Decimal('500.0')
+        saldo_promedio = Decimal('750.0')
+        transacciones = []
 
-        # Crear una nueva instancia de InformeDTO con los datos de prueba
+        # Crear instancia
         informe = InformeDTO(
-            total_depositos=total_depositos,    # Asigna el total de depósitos
-            total_retiros=total_retiros,        # Asigna el total de retiros
-            saldo_promedio=saldo_promedio,      # Asigna el saldo promedio
-            transacciones=transacciones         # Asigna el número de transacciones
+            total_depositos=total_depositos,
+            total_retiros=total_retiros,
+            saldo_promedio=saldo_promedio,
+            transacciones=transacciones
         )
 
-        # Verificaciones para asegurar que los atributos se inicializaron correctamente
-        self.assertEqual(informe.total_depositos, total_depositos)  # Verifica el total de depósitos
-        self.assertEqual(informe.total_retiros, total_retiros)      # Verifica el total de retiros
-        self.assertEqual(informe.saldo_promedio, saldo_promedio)    # Verifica el saldo promedio
-        self.assertEqual(informe.transacciones, transacciones)      # Verifica el número de transacciones
+        # Verificaciones
+        self.assertEqual(informe.total_depositos, total_depositos)
+        self.assertEqual(informe.total_retiros, total_retiros)
+        self.assertEqual(informe.saldo_promedio, saldo_promedio)
+        self.assertEqual(informe.transacciones, transacciones)
 
     def test_repr(self):
-        # Datos de prueba para verificar la representación en cadena
         informe = InformeDTO(
-            total_depositos=1000.0,
-            total_retiros=500.0,
-            saldo_promedio=750.0,
-            transacciones=10
+            total_depositos=Decimal('1000.0'),
+            total_retiros=Decimal('500.0'),
+            saldo_promedio=Decimal('750.0'),
+            transacciones=[]
         )
         
-        # Verifica que la representación en cadena sea correcta
-        esperado = "InformeDTO(total_depositos=1000.0, total_retiros=500.0, saldo_promedio=750.0, transacciones=10)"
+        esperado = "InformeDTO(total_depositos=1000.0, total_retiros=500.0, saldo_promedio=750.0, transacciones=[])"
         self.assertEqual(repr(informe), esperado)
 
 if __name__ == '__main__':

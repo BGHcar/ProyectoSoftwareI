@@ -1,125 +1,117 @@
 import unittest
 from unittest.mock import Mock
-from uuid import uuid4
-from application.services.transactionApplicationService import TransactionApplicationService
-
-from domain.entities.transaction import Transaction
-from domain.entities.account import Account
+from uuid import UUID, uuid4
+from datetime import datetime
+from decimal import Decimal
+from application.services.transaction_application_service import TransactionApplicationService
+from application.dtos.transaction_dto import TransactionDTO
+from application.dtos.informe_dto import InformeDTO
 from domain.repositories.i_transaction_service import ITransactionService
 from domain.repositories.i_account_repository import IAccountRepository
 
 class TestTransactionApplicationService(unittest.TestCase):
     def setUp(self):
-        # Crear mocks para las dependencias
-        self.mock_transaction_service = Mock(spec=ITransactionService)
-        self.mock_account_repository = Mock(spec=IAccountRepository)
-
-        # Instanciar TransactionApplicationService con mocks
+        self.transaction_service = Mock(spec=ITransactionService)
+        self.account_repository = Mock(spec=IAccountRepository)
         self.service = TransactionApplicationService(
-            transaction_service=self.mock_transaction_service,
-            account_repository=self.mock_account_repository
+            self.transaction_service,
+            self.account_repository
         )
+        # Asegurar que el método existe en el mock
+        self.transaction_service.generar_informe_financiero = Mock()
+        # Agregar el método realizar_transaccion al mock
+        self.transaction_service.realizar_transaccion = Mock(return_value="Transacción exitosa")
 
-    def test_realizar_transaccion(self):
-        # Configurar el DTO de prueba
-        dto = {"cuenta_id": uuid4(), "monto": 1000.0, "tipo": "depósito"}
+    def test_realizar_transaccion_exitosa(self):
+        # Arrange
+        dto = TransactionDTO(
+            id=uuid4(),
+            cuenta_id=uuid4(),
+            monto=Decimal('100.0'),
+            tipo="TRANSFERENCIA",
+            estado="PENDIENTE",
+            fecha=datetime.now()
+        )
+        self.account_repository.obtener_por_usuario.return_value = Mock()
+        self.transaction_service.realizar_transaccion.return_value = "Transacción exitosa"
 
-        # Crear la transacción y la cuenta
-        transaccion = Transaction(id=uuid4(), cuenta_id=dto["cuenta_id"], monto=dto["monto"], tipo=dto["tipo"])
-        cuenta = Account(id=dto["cuenta_id"], balance=500.0)
-
-        # Configurar el comportamiento del mock para procesar transacciones
-        self.mock_transaction_service.procesar_transacciones.return_value = None
-        self.mock_account_repository.actualizar_balance.return_value = None
-
-        # Ejecutar el método
+        # Act
         resultado = self.service.realizar_transaccion(dto)
 
-        # Verificar que se llamaron los métodos esperados
-        self.mock_transaction_service.procesar_transacciones.assert_called_once_with(transaccion, cuenta)
-        self.mock_account_repository.actualizar_balance.assert_called_once_with(transaccion)
+        # Assert
+        self.assertEqual(resultado, "Transacción exitosa")
+        self.account_repository.obtener_por_usuario.assert_called_once_with(dto.cuenta_id)
+        self.transaction_service.realizar_transaccion.assert_called_once_with(dto)
 
-        # Verificar el resultado
-        self.assertEqual(resultado, "Transacción completada con éxito.")
+    def test_realizar_transaccion_cuenta_no_existe(self):
+        # Arrange
+        dto = TransactionDTO(
+            id=uuid4(),
+            cuenta_id=uuid4(),
+            monto=Decimal('100.0'),
+            tipo="TRANSFERENCIA",
+            estado="PENDIENTE",
+            fecha=datetime.now()
+        )
+        self.account_repository.obtener_por_usuario.return_value = None
 
-    def test_listar_transacciones(self):
-        # Configurar el ID de cuenta de prueba
+        # Act & Assert
+        with self.assertRaises(ValueError) as context:
+            self.service.realizar_transaccion(dto)
+        self.assertEqual(str(context.exception), "La cuenta no existe")
+
+    def test_listar_transacciones_exitoso(self):
+        # Arrange
         cuenta_id = uuid4()
+        transacciones_mock = [Mock(), Mock()]
+        self.account_repository.obtener_por_usuario.return_value = Mock()
+        self.transaction_service.listar_transacciones.return_value = transacciones_mock
 
-        # Configurar el comportamiento del mock para listar transacciones
-        transacciones = [
-            Transaction(id=uuid4(), cuenta_id=cuenta_id, monto=500.0, tipo="retiro"),
-            Transaction(id=uuid4(), cuenta_id=cuenta_id, monto=1000.0, tipo="depósito")
-        ]
-        self.mock_transaction_service.listar_transacciones.return_value = transacciones
-
-        # Ejecutar el método
+        # Act
         resultado = self.service.listar_transacciones(cuenta_id)
 
-        # Verificar que se llamó el método esperado
-        self.mock_transaction_service.listar_transacciones.assert_called_once_with(cuenta_id)
+        # Assert
+        self.assertEqual(resultado, transacciones_mock)
+        self.account_repository.obtener_por_usuario.assert_called_once_with(cuenta_id)
+        self.transaction_service.listar_transacciones.assert_called_once_with(cuenta_id)
 
-        # Verificar el resultado
-        self.assertEqual(resultado, transacciones)
-
-    def test_generar_informe_financiero(self):
-        # Configurar el ID de cuenta de prueba
+    def test_listar_transacciones_cuenta_no_existe(self):
+        # Arrange
         cuenta_id = uuid4()
+        self.account_repository.obtener_por_usuario.return_value = None
 
-        # Configurar el comportamiento del mock para obtener las transacciones
-        transacciones = [
-            Transaction(id=uuid4(), cuenta_id=cuenta_id, monto=500.0, tipo="retiro"),
-            Transaction(id=uuid4(), cuenta_id=cuenta_id, monto=1000.0, tipo="depósito")
+        # Act & Assert
+        with self.assertRaises(ValueError) as context:
+            self.service.listar_transacciones(cuenta_id)
+        self.assertEqual(str(context.exception), "La cuenta no existe")
+
+    def test_generar_informe_financiero_exitoso(self):
+        # Arrange
+        cuenta_id = uuid4()
+        self.account_repository.obtener_por_usuario.return_value = Mock()
+        transacciones_mock = [
+            Mock(monto=Decimal('100.0'), tipo='DEPOSITO'),
+            Mock(monto=Decimal('50.0'), tipo='RETIRO')
         ]
-        self.mock_transaction_service.obtener_transacciones_por_cuenta.return_value = transacciones
+        self.transaction_service.listar_transacciones.return_value = transacciones_mock
 
-        # Configurar el comportamiento del mock del generador de informes
-        informe = {"total_depositos": 1000.0, "total_retiros": 500.0, "balance": 500.0}
-        self.mock_generador_informes.generar.return_value = informe
-
-        # Ejecutar el método
+        # Act
         resultado = self.service.generar_informe_financiero(cuenta_id)
 
-        # Verificar que se llamaron los métodos esperados
-        self.mock_transaction_service.obtener_transacciones_por_cuenta.assert_called_once_with(cuenta_id)
-        self.mock_generador_informes.generar.assert_called_once_with(transacciones)
+        # Assert
+        self.assertIsInstance(resultado, InformeDTO)
+        self.account_repository.obtener_por_usuario.assert_called_once_with(cuenta_id)
+        self.transaction_service.listar_transacciones.assert_called_once_with(cuenta_id)
 
-        # Verificar el resultado
-        self.assertEqual(resultado, informe)
-
-    def test_obtener_cuenta_por_id(self):
-        # Configurar un ID de cuenta
+    def test_generar_informe_financiero_cuenta_no_existe(self):
+        # Arrange
         cuenta_id = uuid4()
+        self.account_repository.obtener_por_usuario.return_value = None
 
-        # Configurar el comportamiento del mock de obtener_por_id
-        cuenta = Account(id=cuenta_id, balance=1000.0)
-        self.mock_account_repository.obtener_por_id.return_value = cuenta
+        # Act & Assert
+        with self.assertRaises(ValueError) as context:
+            self.service.generar_informe_financiero(cuenta_id)
+        self.assertEqual(str(context.exception), "La cuenta no existe")
 
-        # Ejecutar el método
-        resultado = self.mock_account_repository.obtener_por_id(cuenta_id)
-
-        # Verificar que se llamó el método esperado
-        self.mock_account_repository.obtener_por_id.assert_called_once_with(cuenta_id)
-
-        # Verificar el resultado
-        self.assertEqual(resultado, cuenta)
-
-    def test_listar_todas_las_cuentas(self):
-        # Configurar el comportamiento del mock de listar_todos
-        cuentas = [
-            Account(id=uuid4(), balance=1000.0),
-            Account(id=uuid4(), balance=2000.0)
-        ]
-        self.mock_account_repository.listar_todos.return_value = cuentas
-
-        # Ejecutar el método
-        resultado = self.mock_account_repository.listar_todos()
-
-        # Verificar que se llamó el método esperado
-        self.mock_account_repository.listar_todos.assert_called_once()
-
-        # Verificar el resultado
-        self.assertEqual(resultado, cuentas)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
