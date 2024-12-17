@@ -26,7 +26,7 @@ class TestITransactionService(unittest.TestCase):
             id=self.cuenta_id,
             usuario_id=uuid4(),
             saldo=1000.0,
-            estado="activa"
+            limite_diario=5000.0  # Añadido el límite diario requerido
         )
         
         self.transaccion = Transaction(
@@ -63,3 +63,4 @@ class TestITransactionService(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

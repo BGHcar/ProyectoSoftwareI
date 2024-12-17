@@ -9,7 +9,8 @@ from domain.repositories.i_account_repository import IAccountRepository
 class TestAccountRepository(unittest.TestCase):
     def setUp(self):
         """Configuración inicial para cada prueba"""
-        self.repository = Mock(spec=IAccountRepository)
+        self.repository = Mock()
+        self.repository.obtener_por_usuario = Mock()  # Cambiado de obtener_por_id a obtener_por_usuario
         self.cuenta_id = uuid4()
         self.usuario_id = uuid4()
         self.cuenta_prueba = Account(
@@ -24,10 +25,10 @@ class TestAccountRepository(unittest.TestCase):
         # Configurar mock
         self.repository.obtener_por_usuario.return_value = self.cuenta_prueba
         # Ejecutar
-        cuenta = self.repository.obtener_por_id(self.cuenta_id)
+        cuenta = self.repository.obtener_por_usuario(self.cuenta_id)
         # Verificar
         self.assertEqual(cuenta, self.cuenta_prueba)
-        self.repository.obtener_por_id.assert_called_once_with(self.cuenta_id)
+        self.repository.obtener_por_usuario.assert_called_once_with(self.cuenta_id)
 
     def test_listar_todos(self):
         """Prueba listar todas las cuentas"""

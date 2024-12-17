@@ -22,7 +22,7 @@ class TransactionService:
         """
         Procesa una transacción verificando los límites diarios, fondos suficientes y actualizando el saldo.
         """
-        cuenta = self._account_repository.obtener_por_usuario(transaccion.cuenta_id)
+        cuenta = self._account_repository.obtener_por_id(transaccion.cuenta_id)
         if cuenta is None:
             raise ValueError(f"La cuenta con ID {transaccion.cuenta_id} no existe.")
 
