@@ -3,7 +3,7 @@ from typing import List
 from domain.entities.account import Account
 
 class IAccountRepository:
-    def obtener_por_id(self, id: UUID) -> Account:
+    def get_by_id(self, id: UUID) -> Account:
         """
         Obtiene una cuenta por su ID.
         """
@@ -24,5 +24,10 @@ class IAccountRepository:
     def eliminar(self, id: UUID):
         """
         Elimina una cuenta por su ID.
+        """
+        pass
+    def listar_por_usuario(self, usuario_id: UUID) -> List[Account]:
+        """
+        Lista todas las cuentas asociadas a un usuario específico por su ID.
         """
         pass

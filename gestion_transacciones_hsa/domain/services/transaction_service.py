@@ -3,7 +3,11 @@ from domain.repositories.i_transaction_repository import ITransactionRepository
 from domain.repositories.i_account_repository import IAccountRepository
 from domain.entities.transaction import Transaction
 from domain.entities.account import Account
+from decimal import Decimal
 
+from domain.entities.transaction_type import TransactionType
+
+from domain.entities.transaction_type import TransactionType
 
 class TransactionService:
     def __init__(
@@ -16,14 +20,21 @@ class TransactionService:
 
     def procesar_transaccion(self, transaccion: Transaction):
         """
-        Procesa una transacción verificando los límites diarios y actualizando el saldo de la cuenta.
+        Procesa una transacción verificando los límites diarios, fondos suficientes y actualizando el saldo.
         """
-        cuenta = self._account_repository.obtener_por_id(transaccion.cuenta_id)
+        cuenta = self._account_repository.get_by_id(transaccion.cuenta_id)
         if cuenta is None:
             raise ValueError(f"La cuenta con ID {transaccion.cuenta_id} no existe.")
 
+        if not isinstance(transaccion.monto, Decimal):
+            raise ValueError("El monto debe ser de tipo Decimal.")
         # Validar la transacción antes de procesarla
         self.validar_transaccion(transaccion, cuenta)
+
+        # Validar fondos insuficientes en retiros
+        if transaccion.tipo == TransactionType.RETIRO:
+            if cuenta.saldo + transaccion.monto < 0:  # Saldo insuficiente
+                raise ValueError("Fondos insuficientes para realizar la transacción.")
 
         # Guardar la transacción y actualizar el saldo
         cuenta.actualizar_saldo(transaccion.monto)
@@ -39,5 +50,4 @@ class TransactionService:
         """
         Retorna todas las transacciones asociadas a una cuenta específica.
         """
-        return self._transaction_repository.obtener_por_cuenta(cuenta_id)
-
+        return self._transaction_repository.listar_por_cuenta(cuenta_id)
