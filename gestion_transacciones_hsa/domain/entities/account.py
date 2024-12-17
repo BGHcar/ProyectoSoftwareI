@@ -46,9 +46,7 @@ class Account:
 
     def verificar_limite_diario(self, monto: Decimal):
         """
-        Verifica que un monto no exceda el límite diario permitido.
+        Verifica que el monto no exceda el límite diario permitido.
         """
-        if not isinstance(monto, Decimal):
-            raise ValueError("El monto debe ser de tipo Decimal.")
         if abs(monto) > self.limite_diario:
-            raise ValueError("El monto excede el límite diario de la cuenta.")
+            raise ValueError("El monto excede el límite diario permitido.")

@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from uuid import UUID
 from typing import List
 from abc import ABC, abstractmethod
@@ -18,3 +19,10 @@ class ITransactionRepository(ABC):
             List[Transaction]: Lista de transacciones asociadas.
         """
         pass
+    @abstractmethod
+    def save(self, transaction: 'Transaction'):
+            pass
+
+    @abstractmethod
+    def get_by_id(self, transaction_id: str):
+            pass
