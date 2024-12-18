@@ -21,7 +21,8 @@ class TestITransactionRepository(unittest.TestCase):
             id=uuid4(),
             cuenta_id=self.cuenta_id,
             monto=1000.0,
-            tipo="depósito",
+            tipo="deposito",
+            estado="pendiente",
             fecha="2024-03-15"
         )
 

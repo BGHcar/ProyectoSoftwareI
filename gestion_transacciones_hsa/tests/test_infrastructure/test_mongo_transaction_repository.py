@@ -76,7 +76,7 @@ class TestMongoTransactionRepository(unittest.TestCase):
                 "cuenta_id": str(cuenta_id),
                 "monto": "100.00",
                 "tipo": "deposito",
-                "estado": "completado",
+                "estado": "APROBADA",
                 "fecha": datetime.now().isoformat()
             },
             {
@@ -84,7 +84,7 @@ class TestMongoTransactionRepository(unittest.TestCase):
                 "cuenta_id": str(cuenta_id),
                 "monto": "200.00",
                 "tipo": "retiro",
-                "estado": "pendiente",
+                "estado": "PENDIENTE",
                 "fecha": datetime.now().isoformat()
             }
         ]

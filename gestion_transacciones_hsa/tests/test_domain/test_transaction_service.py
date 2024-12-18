@@ -1,7 +1,7 @@
 import uuid
 import unittest
 from domain.entities.account import Account
-from domain.entities.transaction import Transaction
+from domain.entities.transaction import Transaction, TransactionState
 from domain.services.transaction_service import TransactionService
 from domain.entities.transaction_type import TransactionType
 from decimal import Decimal
@@ -52,7 +52,7 @@ class TestTransactionService(unittest.TestCase):
         self.valid_user_id = valid_user_id
 
     def test_deposit(self):
-        transaction = Transaction("tx123", self.valid_account_id, Decimal(100.0), TransactionType.DEPOSITO)
+        transaction = Transaction("tx123", self.valid_account_id, Decimal(100.0), TransactionType.DEPOSITO, TransactionState.PENDIENTE)
         self.transaction_service.procesar_transaccion(transaction)
 
         account = self.account_repo.obtener_por_id(self.valid_account_id)
@@ -62,7 +62,7 @@ class TestTransactionService(unittest.TestCase):
         """
         Prueba que procesar_transaccion lanza un ValueError si el monto no es Decimal.
         """
-        transaction = Transaction("tx124", self.valid_account_id, "100", TransactionType.DEPOSITO)
+        transaction = Transaction("tx124", self.valid_account_id, "100", TransactionType.DEPOSITO, TransactionState.PENDIENTE)
         with self.assertRaises(ValueError) as context:
             self.transaction_service.procesar_transaccion(transaction)
         self.assertEqual(str(context.exception), "El monto debe ser de tipo Decimal.")
@@ -71,7 +71,7 @@ class TestTransactionService(unittest.TestCase):
         """
         Prueba que no se permita un depósito si supera el límite diario.
         """
-        transaction = Transaction("tx125", self.valid_account_id, Decimal(1500.0), TransactionType.DEPOSITO)
+        transaction = Transaction("tx125", self.valid_account_id, Decimal(1500.0), TransactionType.DEPOSITO, TransactionState.PENDIENTE)
         with self.assertRaises(ValueError) as context:
             self.transaction_service.procesar_transaccion(transaction)
         self.assertEqual(str(context.exception), "El monto excede el límite diario permitido.")
@@ -80,7 +80,7 @@ class TestTransactionService(unittest.TestCase):
         """
         Prueba que un retiro exitoso disminuye correctamente el saldo.
         """
-        transaction = Transaction("tx126", self.valid_account_id, Decimal(-200.0), TransactionType.RETIRO)
+        transaction = Transaction("tx126", self.valid_account_id, Decimal(-200.0), TransactionType.RETIRO, TransactionState.PENDIENTE)
         self.transaction_service.procesar_transaccion(transaction)
 
         account = self.account_repo.obtener_por_id(self.valid_account_id)
@@ -90,7 +90,7 @@ class TestTransactionService(unittest.TestCase):
         """
         Prueba que un retiro mayor al saldo lanza un error de fondos insuficientes.
         """
-        transaction = Transaction("tx127", self.valid_account_id, Decimal(-600.0), TransactionType.RETIRO)
+        transaction = Transaction("tx127", self.valid_account_id, Decimal(-600.0), TransactionType.RETIRO, TransactionState.PENDIENTE)
         with self.assertRaises(ValueError) as context:
             self.transaction_service.procesar_transaccion(transaction)
         self.assertEqual(str(context.exception), "Fondos insuficientes para realizar la transacción.")
@@ -100,7 +100,7 @@ class TestTransactionService(unittest.TestCase):
         Prueba que procesar_transaccion lanza un error si la cuenta no existe.
         """
         invalid_account_id = uuid.uuid4()
-        transaction = Transaction("tx128", invalid_account_id, Decimal(100.0), TransactionType.DEPOSITO)
+        transaction = Transaction("tx128", invalid_account_id, Decimal(100.0), TransactionType.DEPOSITO, TransactionState.PENDIENTE)
 
         with self.assertRaises(ValueError) as context:
             self.transaction_service.procesar_transaccion(transaction)

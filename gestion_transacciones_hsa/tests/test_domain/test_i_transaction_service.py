@@ -33,7 +33,8 @@ class TestITransactionService(unittest.TestCase):
             id=uuid4(),
             cuenta_id=self.cuenta_id,
             monto=500.0,
-            tipo="depósito",
+            tipo="deposito",
+            estado="pendiente",
             fecha=datetime.now()
         )
 
