@@ -34,8 +34,26 @@ class TransactionApplicationService:
             raise
 
     def listar_transacciones(self, cuenta_id: UUID) -> List[TransactionDTO]:
-        transacciones = self.transaction_service.listar_transacciones_por_cuenta(cuenta_id)
-        return [TransactionDTO.from_entity(t) for t in transacciones]
+        try:
+            logger.debug(f"Application Service: Iniciando listado de transacciones para cuenta {cuenta_id}")
+            
+            # Verificar si la cuenta existe
+            cuenta = self.account_repository.obtener_por_id(cuenta_id)
+            if not cuenta:
+                logger.error(f"Cuenta no encontrada: {cuenta_id}")
+                raise ValueError(f"La cuenta {cuenta_id} no existe")
+                
+            transacciones = self.transaction_service.listar_transacciones_por_cuenta(cuenta_id)
+            logger.debug(f"Transacciones recuperadas: {len(transacciones)}")
+            
+            dtos = [TransactionDTO.from_entity(t) for t in transacciones]
+            logger.debug(f"DTOs creados: {len(dtos)}")
+            
+            return dtos
+            
+        except Exception as e:
+            logger.error(f"Error en listar_transacciones: {str(e)}", exc_info=True)
+            raise
 
     def generar_informe_financiero(self, cuenta_id: UUID) -> InformeDTO:
         cuenta = self.account_repository.obtener_por_id(cuenta_id)

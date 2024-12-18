@@ -79,4 +79,17 @@ class TransactionService:
         """
         Retorna todas las transacciones asociadas a una cuenta específica.
         """
-        return self._transaction_repository.listar_por_cuenta(cuenta_id)
+        try:
+            logger.debug(f"Intentando listar transacciones para cuenta_id: {cuenta_id}")
+            cuenta = self._account_repository.obtener_por_id(cuenta_id)
+            if cuenta is None:
+                logger.error(f"Cuenta no encontrada para ID: {cuenta_id}")
+                raise ValueError(f"La cuenta con ID {cuenta_id} no existe.")
+                
+            transacciones = self._transaction_repository.listar_por_cuenta(cuenta_id)
+            logger.debug(f"Transacciones encontradas: {len(transacciones)}")
+            return transacciones
+            
+        except Exception as e:
+            logger.error(f"Error al listar transacciones: {str(e)}", exc_info=True)
+            raise

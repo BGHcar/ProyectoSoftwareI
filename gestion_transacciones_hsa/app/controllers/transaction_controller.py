@@ -84,11 +84,21 @@ def listar_transacciones(
     Lista todas las transacciones de una cuenta específica.
     """
     try:
+        logger.debug(f"Iniciando listado de transacciones para cuenta_id: {cuenta_id}")
+        logger.debug(f"Usando servicio: {transaction_app_service}")
+        
         transacciones = transaction_app_service.listar_transacciones(cuenta_id)
-        return [TransactionMapper.dto_to_json(t) for t in transacciones]
+        logger.debug(f"Transacciones recuperadas: {transacciones}")
+        
+        resultado = [TransactionMapper.dto_to_json(t) for t in transacciones]
+        logger.debug(f"Transacciones convertidas a JSON: {resultado}")
+        
+        return resultado
     except ValueError as e:
+        logger.error(f"Error de validación al listar transacciones: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.error(f"Error inesperado al listar transacciones: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 @router.get("/informes/{cuenta_id}", response_model=dict)
@@ -100,14 +110,24 @@ def generar_informe_financiero(
     Genera un informe financiero de una cuenta específica.
     """
     try:
+        logger.debug(f"Iniciando generación de informe para cuenta_id: {cuenta_id}")
+        logger.debug(f"Usando servicio: {transaction_app_service}")
+        
         informe: InformeDTO = transaction_app_service.generar_informe_financiero(cuenta_id)
-        return {
+        logger.debug(f"Informe generado: {informe}")
+        
+        resultado = {
             "total_depositos": float(informe.total_depositos),
             "total_retiros": float(informe.total_retiros),
             "saldo_promedio": float(informe.saldo_promedio),
-            "transacciones": [TransactionMapper.json_to_dto(t) for t in informe.transacciones]
+            "transacciones": [TransactionMapper.dto_to_json(t) for t in informe.transacciones]
         }
+        logger.debug(f"Informe convertido a JSON: {resultado}")
+        
+        return resultado
     except ValueError as e:
+        logger.error(f"Error de validación al generar informe: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.error(f"Error inesperado al generar informe: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Error interno del servidor")
