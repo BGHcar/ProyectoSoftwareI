@@ -7,6 +7,12 @@ from pymongo import MongoClient                 # Cliente para conectar con Mong
 from pymongo.database import Database           # Tipo Database de MongoDB
 from domain.repositories.i_transaction_repository import ITransactionRepository  # Interfaz base
 from domain.entities.transaction import Transaction  # Entidad de transacción
+import logging
+
+# Configurar logging para silenciar mensajes de pymongo
+logging.getLogger('pymongo').setLevel(logging.WARNING)
+logging.getLogger('mongodb').setLevel(logging.WARNING)
+logger = logging.getLogger(__name__)
 
 class MongoTransactionRepository(ITransactionRepository):  # Implementación MongoDB del repositorio
     """
@@ -31,24 +37,29 @@ class MongoTransactionRepository(ITransactionRepository):  # Implementación Mon
 
     def guardar(self, transaccion: Transaction) -> None:
         """
-        Guarda una transacción en la base de datos.
-        
-        Args:
-            transaccion: Objeto Transaction a guardar
+        Guarda una transacción en MongoDB.
         """
-        transaction_dict = {                           # Convierte Transaction a diccionario
-            "_id": str(transaccion.id),               # Convierte UUID a string
-            "cuenta_id": str(transaccion.cuenta_id),  # Convierte UUID a string
-            "monto": str(transaccion.monto),          # Convierte Decimal a string
-            "tipo": transaccion.tipo,
-            "estado": transaccion.estado,
-            "fecha": transaccion.fecha.isoformat()    # Convierte datetime a string ISO
-        }
-        self.collection.replace_one(                  # Actualiza o inserta el documento
-            {"_id": transaction_dict["_id"]},         # Busca por ID
-            transaction_dict,                         # Nuevo documento
-            upsert=True                              # Crea si no existe
-        )
+        try:
+            transaction_dict = {
+                "_id": str(transaccion.id),
+                "cuenta_id": str(transaccion.cuenta_id),
+                "monto": str(transaccion.monto),
+                "tipo": transaccion.tipo.value if hasattr(transaccion.tipo, 'value') else str(transaccion.tipo),
+                "estado": transaccion.estado.value if hasattr(transaccion.estado, 'value') else str(transaccion.estado),
+                "fecha": transaccion.fecha.isoformat()
+            }
+            
+            logger.debug(f"Guardando transacción en MongoDB: {transaction_dict}")
+            self.collection.replace_one(
+                {"_id": transaction_dict["_id"]},
+                transaction_dict,
+                upsert=True
+            )
+            logger.debug("Transacción guardada exitosamente en MongoDB")
+            
+        except Exception as e:
+            logger.error(f"Error al guardar en MongoDB: {str(e)}", exc_info=True)
+            raise
 
     def obtener_por_id(self, id: UUID) -> Transaction:
         """

@@ -20,31 +20,22 @@ class TransactionService:
     ):
         self._transaction_repository = transaction_repository
         self._account_repository = account_repository
-        logger.debug("TransactionService inicializado")
+        logger.debug(f"TransactionService inicializado con repositorio: {transaction_repository.__class__.__name__}")
 
-    def procesar_transaccion(self, dto: TransactionDTO) -> None:
+    def procesar_transaccion(self, transaccion: Transaction) -> None:
+        """
+        Procesa y guarda una transacción en el repositorio correspondiente.
+        """
         try:
-            logger.debug(f"Procesando transacción - Estado inicial: {dto.estado}")
-            transaccion = Transaction(
-                id=dto.id,
-                cuenta_id=dto.cuenta_id,
-                monto=dto.monto,
-                tipo=dto.tipo,
-                estado=dto.estado,
-                fecha=dto.fecha
-            )
-            logger.debug(f"Transacción creada: {transaccion}")
+            logger.debug(f"Procesando transacción en {self._transaction_repository.__class__.__name__}")
+            logger.debug(f"Detalles de la transacción: {transaccion}")
             
-            cuenta = self._account_repository.obtener_por_id(transaccion.cuenta_id)
-            if cuenta is None:
-                raise ValueError(f"La cuenta con ID {transaccion.cuenta_id} no existe.")
-
-            logger.debug(f"Guardando transacción en estado: {transaccion.estado}")
+            # Guardar la transacción
             self._transaction_repository.guardar(transaccion)
             logger.debug("Transacción guardada exitosamente")
-
+            
         except Exception as e:
-            logger.error(f"Error en procesar_transaccion: {str(e)}", exc_info=True)
+            logger.error(f"Error al procesar transacción: {str(e)}", exc_info=True)
             raise
 
     def procesar_transaccion(self, transaccion: Transaction):
@@ -68,6 +59,17 @@ class TransactionService:
         # Guardar la transacción y actualizar el saldo
         cuenta.actualizar_saldo(transaccion.monto)
         self._transaction_repository.guardar(transaccion)
+
+    def realizar_transaccion(self, transaccion: Transaction) -> None:
+        # Guardar en SQLite
+        self._transaction_repository.guardar(transaccion)
+        
+        # Guardar en MongoDB si está disponible
+        if self.mongo_transaction_repository:
+            try:
+                self.mongo_transaction_repository.guardar(transaccion)
+            except Exception as e:
+                logging.error(f"Error al guardar en MongoDB: {e}")
 
     def validar_transaccion(self, transaccion: Transaction, cuenta: Account):
         """

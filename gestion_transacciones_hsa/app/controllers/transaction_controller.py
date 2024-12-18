@@ -21,6 +21,10 @@ def get_transaction_app_service() -> TransactionApplicationService:
     from app.main import transaction_app_service
     return transaction_app_service
 
+def get_mongo_transaction_service():
+    from app.main import mongo_transaction_service
+    return mongo_transaction_service
+
 class TransactionRequest(BaseModel):
     cuenta_id: UUID
     monto: float
@@ -31,7 +35,8 @@ class TransactionRequest(BaseModel):
 @router.post("/transacciones/")
 def realizar_transaccion(
     transaction_request: TransactionRequest,
-    transaction_app_service: TransactionApplicationService = Depends(get_transaction_app_service)
+    transaction_app_service: TransactionApplicationService = Depends(get_transaction_app_service),
+    mongo_service = Depends(get_mongo_transaction_service)
 ):
     """
     Realiza una transacción.
@@ -69,7 +74,18 @@ def realizar_transaccion(
         logger.debug(f"DTO creado exitosamente: {transaction_dto}")
         
         logger.debug("Realizando transacción...")
-        transaction_app_service.realizar_transaccion(transaction_dto)
+        transaction_app_service.realizar_transaccion(transaction_dto)  # SQLite
+        
+        try:
+            # Convertir DTO a entidad para MongoDB
+            transaction_entity = TransactionMapper.dto_to_entity(transaction_dto)
+            logger.debug(f"Intentando guardar en MongoDB: {transaction_entity}")
+            mongo_service.procesar_transaccion(transaction_entity)
+            logger.debug("Transacción guardada exitosamente en MongoDB")
+        except Exception as e:
+            logger.error(f"Error al guardar en MongoDB: {str(e)}", exc_info=True)
+            # Continuar aunque falle MongoDB
+        
         logger.debug("Transacción completada exitosamente")
         
         return {"message": "Transacción realizada con éxito", 
