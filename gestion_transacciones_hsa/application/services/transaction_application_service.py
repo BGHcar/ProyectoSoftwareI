@@ -1,12 +1,15 @@
+import logging
 from application.dtos.transaction_dto import TransactionDTO
 from application.dtos.informe_dto import InformeDTO
-from gestion_transacciones_hsa.domain.repositories.i_transaction_repository import ITransactionRepository
+from domain.repositories.i_transaction_repository import ITransactionRepository
 from domain.repositories.i_account_repository import IAccountRepository
 from domain.services.transaction_service import TransactionService
 from uuid import UUID
 from typing import List
 from decimal import Decimal
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class TransactionApplicationService:
     def __init__(
@@ -18,11 +21,17 @@ class TransactionApplicationService:
         self.account_repository = account_repository
 
     def realizar_transaccion(self, dto: TransactionDTO):
-        cuenta = self.account_repository.obtener_por_id(dto.cuenta_id)
-        if not cuenta:
-            raise ValueError("La cuenta no existe.")
-        return self.transaction_service.procesar_transaccion(dto)
-
+        try:
+            logger.debug(f"Procesando transacción - ID: {dto.id}, Tipo: {dto.tipo}, Estado: {dto.estado}")
+            logger.debug(f"Iniciando proceso de transacción con DTO: {dto}")
+            cuenta = self.account_repository.obtener_por_id(dto.cuenta_id)
+            if not cuenta:
+                raise ValueError("La cuenta no existe.")
+            return self.transaction_service.procesar_transaccion(dto)
+            logger.debug("Transacción completada exitosamente")
+        except Exception as e:
+            logger.error(f"Error en realizar_transaccion: {str(e)}", exc_info=True)
+            raise
 
     def listar_transacciones(self, cuenta_id: UUID) -> List[TransactionDTO]:
         transacciones = self.transaction_service.listar_transacciones_por_cuenta(cuenta_id)

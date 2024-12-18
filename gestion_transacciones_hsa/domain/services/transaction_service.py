@@ -1,13 +1,16 @@
 # domain/services/transaction_service.py 
 from domain.repositories.i_transaction_repository import ITransactionRepository
 from domain.repositories.i_account_repository import IAccountRepository
-from domain.entities.transaction import Transaction
+from domain.entities.transaction import Transaction, TransactionState
 from domain.entities.account import Account
 from decimal import Decimal
+from application.dtos.transaction_dto import TransactionDTO
+import logging
 
 from domain.entities.transaction_type import TransactionType
 
-from domain.entities.transaction_type import TransactionType
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class TransactionService:
     def __init__(
@@ -17,6 +20,32 @@ class TransactionService:
     ):
         self._transaction_repository = transaction_repository
         self._account_repository = account_repository
+        logger.debug("TransactionService inicializado")
+
+    def procesar_transaccion(self, dto: TransactionDTO) -> None:
+        try:
+            logger.debug(f"Procesando transacción - Estado inicial: {dto.estado}")
+            transaccion = Transaction(
+                id=dto.id,
+                cuenta_id=dto.cuenta_id,
+                monto=dto.monto,
+                tipo=dto.tipo,
+                estado=dto.estado,
+                fecha=dto.fecha
+            )
+            logger.debug(f"Transacción creada: {transaccion}")
+            
+            cuenta = self._account_repository.obtener_por_id(transaccion.cuenta_id)
+            if cuenta is None:
+                raise ValueError(f"La cuenta con ID {transaccion.cuenta_id} no existe.")
+
+            logger.debug(f"Guardando transacción en estado: {transaccion.estado}")
+            self._transaction_repository.guardar(transaccion)
+            logger.debug("Transacción guardada exitosamente")
+
+        except Exception as e:
+            logger.error(f"Error en procesar_transaccion: {str(e)}", exc_info=True)
+            raise
 
     def procesar_transaccion(self, transaccion: Transaction):
         """

@@ -5,10 +5,15 @@ from decimal import Decimal  # Importa Decimal para manejo preciso de números d
 from datetime import datetime  # Importa datetime para manejo de fechas y tiempo
 from contextlib import contextmanager  # Importa decorador para manejar contextos
 import sqlite3  # Importa el módulo para trabajar con SQLite
+import logging  # Importa el módulo para logging
 
 # Importa interfaces y entidades del dominio
 from domain.repositories.i_transaction_repository import ITransactionRepository
 from domain.entities.transaction import Transaction, TransactionType, TransactionState
+
+# Configuración del logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class SQLiteTransactionRepository(ITransactionRepository):
     """
@@ -61,23 +66,26 @@ class SQLiteTransactionRepository(ITransactionRepository):
     def save(self, transaction: Transaction) -> None:
         """
         Guarda una transacción en la base de datos.
-        
-        Args:
-            transaction: Objeto Transaction a guardar
         """
-        with self._get_connection() as conn:
-            conn.execute("""
-                INSERT OR REPLACE INTO transacciones 
-                (id, cuenta_id, monto, tipo, estado, fecha)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                str(transaction.id),
-                str(transaction.cuenta_id),
-                f"{transaction.monto:.2f}",
-                transaction.tipo.value,
-                transaction.estado.value,
-                transaction.fecha.isoformat()
-            ))
+        try:
+            logger.debug(f"Estado de transacción al guardar: {transaction.estado}")
+            with self._get_connection() as conn:
+                conn.execute("""
+                    INSERT OR REPLACE INTO transacciones 
+                    (id, cuenta_id, monto, tipo, estado, fecha)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    str(transaction.id),
+                    str(transaction.cuenta_id),
+                    f"{transaction.monto:.2f}",
+                    transaction.tipo.value if hasattr(transaction.tipo, 'value') else str(transaction.tipo),
+                    transaction.estado.value if hasattr(transaction.estado, 'value') else str(transaction.estado),
+                    transaction.fecha.isoformat()
+                ))
+                logger.debug("Transacción guardada exitosamente en BD")
+        except Exception as e:
+            logger.error(f"Error crítico al guardar en BD: {str(e)}", exc_info=True)
+            raise
 
     def get_by_id(self, id: UUID) -> Transaction:
         """

@@ -9,9 +9,8 @@ class TransactionDTO:
         self.cuenta_id = cuenta_id
         self.monto = monto
         self.tipo = tipo
-        self.estado = estado
+        self.estado = estado.upper()
         self.fecha = fecha
 
-
     def __repr__(self):
-        return f"TransactionDTO(id={self.id}, cuenta_id={self.cuenta_id}, monto={self.monto}, tipo='{self.tipo}', estado='{self.estado}', fecha='{self.fecha}')"
+        return f"TransactionDTO(id={self.id}, cuenta_id={self.cuenta_id}, monto={self.monto}, tipo={self.tipo.name}, estado='{self.estado}', fecha='{self.fecha}')"

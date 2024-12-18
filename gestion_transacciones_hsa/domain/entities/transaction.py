@@ -4,11 +4,22 @@ from datetime import datetime
 from domain.entities.transaction_type import TransactionType
 from enum import Enum
 from decimal import Decimal
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class TransactionState(Enum):
-    PENDIENTE = "pendiente"
-    APROBADA = "aprobada"
-    RECHAZADA = "rechazada"
+    PENDIENTE = "PENDIENTE"  # Cambiado a mayúsculas para consistencia
+    APROBADA = "APROBADA"
+    RECHAZADA = "RECHAZADA"
+
+    @classmethod
+    def from_string(cls, value: str):
+        try:
+            return cls[value.upper()]
+        except KeyError:
+            raise ValueError(f"Estado de transacción no válido: {value}")
 
 class Transaction:
     def __init__(
@@ -17,17 +28,22 @@ class Transaction:
         cuenta_id: UUID,
         monto: Decimal,
         tipo: TransactionType,
-        estado: TransactionState = TransactionState.PENDIENTE,
+        estado: str | TransactionState,
         fecha: datetime = None
     ):
+        logger.debug(f"Creando nueva transacción - ID: {id}, Tipo: {tipo}, Estado: {estado}")
         self.id = id
         self.cuenta_id = cuenta_id
         self.monto = monto
-        self.tipo = tipo
-        self.estado = estado
+        logger.debug(f"Procesando tipo de transacción: {tipo}, Tipo de dato: {type(tipo)}")
+        self.tipo = tipo if isinstance(tipo, TransactionType) else TransactionType.from_string(tipo)
+        logger.debug(f"Procesando estado de transacción: {estado}")
+        self.estado = estado if isinstance(estado, TransactionState) else TransactionState.from_string(estado)
         self.fecha = fecha or datetime.now()  # Si no se proporciona, asigna la fecha actual.
+        logger.debug(f"Transacción creada exitosamente con estado: {self.estado}")
         
     def validar(self):  # Valida que los atributos de la transacción sean válidos
+        logger.debug(f"Validando transacción {self.id}")
         if self.monto <= 0:
             raise ValueError("El monto de la transacción debe ser mayor a 0.")
         if self.estado not in TransactionState:

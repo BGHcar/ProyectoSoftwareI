@@ -8,7 +8,7 @@ from infrastructure.repositories.sqlite_account_repository import SQLiteAccountR
 router = APIRouter()
 
 def get_account_repository() -> SQLiteAccountRepository:
-    from gestion_transacciones_hsa.app.main import account_repository
+    from app.main import account_repository
     return account_repository
 
 @router.post("/cuentas/")
