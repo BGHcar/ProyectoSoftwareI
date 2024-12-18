@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 from typing import List
 from abc import ABC, abstractmethod
-from domain.entities.transaction import Transaction
-from domain.repositories.i_repository import IRepository
+from ..entities.transaction import Transaction
+from ..repositories.i_repository import IRepository
+from ..entities.transaction import Transaction
 
 class ITransactionRepository(IRepository[Transaction]):
     """
