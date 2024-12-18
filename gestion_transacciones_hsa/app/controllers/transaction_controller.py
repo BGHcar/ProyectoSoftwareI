@@ -8,6 +8,7 @@ from application.dtos.informe_dto import InformeDTO
 from pydantic import BaseModel
 from datetime import datetime
 import logging
+from domain.entities.transaction import TransactionState
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -39,12 +40,20 @@ def realizar_transaccion(
     try:
         logger.debug(f"Iniciando procesamiento de transacción con request: {transaction_request}")
         
+        # Validar estado antes de procesar
+        estado = transaction_request.estado.upper()
+        try:
+            TransactionState(estado)
+        except ValueError:
+            estados_validos = [e.value for e in TransactionState]
+            raise ValueError(f"Estado inválido. Estados válidos: {estados_validos}")
+            
         transaction_json = {
             "id": str(uuid4()),
             "cuenta_id": transaction_request.cuenta_id,  # Ya es UUID, no necesita conversión
             "monto": float(transaction_request.monto),
             "tipo": transaction_request.tipo.upper(),
-            "estado": transaction_request.estado.upper(),
+            "estado": estado,
             "fecha": transaction_request.fecha
         }
         logger.debug(f"JSON creado: {transaction_json}")

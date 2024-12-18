@@ -10,16 +10,21 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 class TransactionState(Enum):
-    PENDIENTE = "PENDIENTE"  # Cambiado a mayúsculas para consistencia
+    PENDIENTE = "PENDIENTE"
     APROBADA = "APROBADA"
     RECHAZADA = "RECHAZADA"
 
     @classmethod
-    def from_string(cls, value: str):
+    def from_string(cls, value: str) -> 'TransactionState':
+        """Convierte un string a TransactionState de manera segura"""
         try:
-            return cls[value.upper()]
-        except KeyError:
-            raise ValueError(f"Estado de transacción no válido: {value}")
+            return cls(value.upper())
+        except ValueError:
+            estados_validos = [e.value for e in cls]
+            raise ValueError(f"Estado inválido '{value}'. Estados válidos: {estados_validos}")
+
+    def __str__(self):
+        return self.value
 
 class Transaction:
     def __init__(

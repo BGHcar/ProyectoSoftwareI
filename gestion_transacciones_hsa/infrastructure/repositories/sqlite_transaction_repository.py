@@ -120,31 +120,27 @@ class SQLiteTransactionRepository(ITransactionRepository):
             )
 
     def get_by_account(self, account_id: UUID) -> List[Transaction]:
-        """
-        Lista todas las transacciones de una cuenta específica.
-        
-        Args:
-            account_id: UUID de la cuenta
-            
-        Returns:
-            List[Transaction]: Lista de transacciones de la cuenta
-        """
-        with self._get_connection() as conn:
-            cursor = conn.execute(
-                "SELECT * FROM transacciones WHERE cuenta_id = ?",
-                (str(account_id),)
-            )
-            return [
-                Transaction(
-                    id=UUID(row[0]),
-                    cuenta_id=UUID(row[1]),
-                    monto=Decimal(str(row[2])),
-                    tipo=TransactionType(row[3]),
-                    estado=TransactionState(row[4]),
-                    fecha=datetime.fromisoformat(row[5])
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.execute(
+                    "SELECT * FROM transacciones WHERE cuenta_id = ?",
+                    (str(account_id),)
                 )
-                for row in cursor.fetchall()
-            ]
+                rows = cursor.fetchall()
+                return [
+                    Transaction(
+                        id=UUID(row[0]),
+                        cuenta_id=UUID(row[1]),
+                        monto=Decimal(str(row[2])),
+                        tipo=TransactionType(row[3]),
+                        estado=TransactionState.from_string(row[4]),  # Usar el método seguro
+                        fecha=datetime.fromisoformat(row[5])
+                    )
+                    for row in rows
+                ]
+        except Exception as e:
+            logger.error(f"Error al recuperar transacciones: {str(e)}", exc_info=True)
+            raise
 
     def listar_todos(self) -> List[Transaction]:
         """
